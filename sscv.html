@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<title>SSCVisualizer</title>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
+	
+	<!-- <link rel="stylesheet" href="http://jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">-->
+	<!-- <link rel="stylesheet" href="http://jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
+	<link href="/MDI-DE/SSCVisualizer/lib/flot/examples/examples.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="http://en.benjaminbuffet.com/wp-content/themes/theme/style.css" type="text/css" media="screen" />-->
+	<link rel="stylesheet" href="/MDI-DE/SSCVisualizer/style_sscv.css" type="text/css">
+	
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+	<script language="javascript" type="text/javascript" src="/MDI-DE/SSCVisualizer/lib/flot/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="/MDI-DE/SSCVisualizer/lib/flot/jquery.flot.categories.js"></script>
+	<script language="javascript" type="text/javascript" src="http://www.benjaminbuffet.com/public/js/jquery.flot.orderBars.js"></script>
+	
+    <script src="/MDI-DE/SSCVisualizer/sscv.js"></script>
+</head>
+<body>
+	<h1>SSCVisualizer</h1>
+	<div id="main">
+		<div id="input">
+			<h2>Input</h2>
+			<section id="fetch">
+			  Authentification: <input type="text" placeholder="Enter auth id" id="auth" style="width:240px;" value="bb1022ba3a2821ca6369dd11b01a5d78"></input>
+			  Type:
+				<select id="type">
+					<option value="WMS">WMS</option><option value="WFS">WFS</option>
+				</select>
+			  <br>
+				  <input type="radio" id="period1" name="period" value="7"> last week<br>
+				  <input type="radio" id="period2" name="period" value="14"> last two weeks<br>
+				  <input type="radio" id="period3" name="period" value="9999"> all (beware!)<br>
+				  <input type="radio" id="period4" name="period"> set date range
+		   </section>
+			<label for="from">From</label>
+			<input type="text" id="from" name="from" />
+			<label for="to">to</label>
+			<input type="text" id="to" name="to" />
+			<div id="reqLink"></div>
+			<div id="serviceList"></div>
+	   </div>
+	   
+	   <div id="buttonArea">
+		<h2>Action</h2>
+			<input class="buttons" type="button" value="Fetch JSON" id="FetchBtn" onClick="jsonptest()"/>
+			<input class="buttons" type="button" value="List Services" id="ListBtn" onClick="getServices()" disabled="true"/>
+			
+			<input class="buttons" type="button" value="Show currentScore" id="ScoreBtn" onClick="showScores()" disabled="true"/>
+			
+			<input class="buttons" type="button" value="Test" onClick="test2()"/>
+			
+			<h3>Legend</h3>
+			<div id="legend"></div>
+		</div>
+		
+	   <div id="scoreGraph">
+		<h2>Diagram</h2>
+	   </div>
+	      
+	   
+	</div>
+	
+	<div class="console">
+		<b>Console</b>
+			<div id="console">
+		</div>
+	</div>
+	
+	   <div id="request"></div>
+   
+   	
+		<div id="response"></div>
+	
+			
+	
+	
+	<br>
+	
+	<br>
+	<div id="placeholder1" style="width:500px;height:300px;"></div>
+	<hr>
+	
+	<hr>
+	<b>Test</b>
+	<div id="test"></div>
+</body>
+</html>

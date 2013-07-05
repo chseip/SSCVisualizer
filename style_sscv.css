@@ -1,0 +1,120 @@
+.tooltip-with-bg{
+                font-size: 12;
+                font-family: verdana, sans-serif;
+                background: silver none;
+                border: 1px gray solid;
+            }
+
+#console {
+	clear: both;
+    font-size: 0.9em;
+    margin: 0;
+	padding: 0.1em;
+    text-align: center;
+    background-color: #EBF4FA;
+	border: 1px solid silver;
+	height:2em;
+}
+
+#input {
+	font-size: 0.9em;
+    float: left;
+	width: 23em;
+    margin: 0 0 1.2em;
+	padding: 0;
+    border: 1px dashed silver;
+}
+
+#scoreGraph {
+    margin: 0 15em 1em 22em;
+    padding: 0 1em;
+    border: 1px dashed silver;
+	//width:500px;
+	height:400px;
+  }
+
+#buttonArea {
+    font-size: 0.9em;
+    float: right;
+	width: 15em;
+    margin: 0 0 1.1em;
+	padding: 0;
+    //background-color: #eee;
+	border: 1px dashed silver;
+  }
+
+#main {
+	overflow: hidden;
+	height: 100%; /* for IE6 */
+}
+
+body { 
+    font-family: verdana, sans-serif;
+    font-size: 12px;
+	//font-size: 100.01%;
+    color: #666666; 
+    margin: 0;
+	padding: 1em;
+	background-color: #F0FFFF;
+	min-width: 41em; /* Mindestbreite verhindert Umbruch und Anzeigefehler in modernen Browsern */
+    /* background: transparent url(images/bg-header.png) repeat-x; */
+}
+
+a{
+    color: #859e85;
+    text-decoration: none;
+}
+
+h1 {
+    font-size: 1.5em;
+    margin: 0 0 0.7em; padding: 0.3em;
+    text-align: center;
+    background-color: #E0FFFF;
+    border: 2px ridge silver;
+  }
+
+h2 {
+    font-size: 1.25em;
+    margin: 0 0 0.7em;
+	padding: 0.3em;
+    text-align: center;
+  }
+  
+h3 {
+    font-size: 1.1em;
+    margin: 0.7em 0 0.2em;
+	padding: 0.3em;
+    text-align: center;
+  }
+  
+/*Buttons*/
+.buttons {
+	-moz-box-shadow:inset 0px 1px 0px 0px #bbdaf7;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #bbdaf7;
+	box-shadow:inset 0px 1px 0px 0px #bbdaf7;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #79bbff), color-stop(1, #378de5) );
+	background:-moz-linear-gradient( center top, #79bbff 5%, #378de5 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#79bbff', endColorstr='#378de5');
+	background-color:#79bbff;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #84bbf3;
+	display:inline-block;
+	color:#ffffff;
+	padding:4px 12px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #528ecc;
+	margin: 0 0.2em 0.2em;
+}.buttons:hover:enabled {
+//http://stackoverflow.com/questions/11327708/how-to-stop-hover-effect-for-button-in-disable-mode
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #378de5), color-stop(1, #79bbff) );
+	background:-moz-linear-gradient( center top, #378de5 5%, #79bbff 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#378de5', endColorstr='#79bbff');
+	background-color:#378de5;
+}.buttons:active {
+	position:relative;
+	top:1px;
+}.buttons:disabled  {
+	opacity: 0.5;
+}
