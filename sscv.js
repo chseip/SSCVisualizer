@@ -30,6 +30,13 @@ var message = "Beginning message...";
 	}
 	
 	/**
+	*
+	*/
+	function checkRadio() {
+		document.getElementById("period4").checked = true;
+	}
+	
+	/**
 	* SideBySide Bars Plugin
 	* @url: http://en.benjaminbuffet.com/labs/flot/
 	*/
@@ -243,14 +250,15 @@ var message = "Beginning message...";
 		document.getElementById("serviceList").innerHTML=output;
 		//document.getElementById("test").innerHTML=testOut;
 		document.getElementById('ScoreBtn').disabled = false;
+		document.getElementById('SpeedBtn').disabled = false;
 	}
 	
 	//Transforms scores[] into data[] suitable for flot
 	//Attention "for.. in" does not work here! http://stackoverflow.com/questions/500504/javascript-for-in-with-arrays
-	//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label
+	//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label, C=4 = currentSpeed
 	//TODO: display name instead of id as label
 	//TODO: could be made easier using the inArray() function
-	function transformScores(scores) {
+	function transformScores(scores, type) {
 		var ids = [];
 		var idtemp = "empty";
 		var ds = new Array();
@@ -266,7 +274,8 @@ var message = "Beginning message...";
 				ids.push(scores[i][0][2]);
 				//create and fill temp[] with 1st score
 				var temp = [];
-				temp.push([scores[i][0][0], scores[i][0][1]]);
+				if (type=='score') temp.push([scores[i][0][0], scores[i][0][1]]);
+				if (type=='speed') temp.push([scores[i][0][0], scores[i][0][4]]);
 			}
 			//2. case: there is something in ids[]
 			else {
@@ -274,7 +283,8 @@ var message = "Beginning message...";
 					if(scores[i][0][2] == ids[k]) {
 						//console.log("found an existing id -> add score to temp => " + scores[i][0][2]+ " value: " + scores[i][0][1]);
 						//found an existing id -> add score to temp
-						temp.push([scores[i][0][0], scores[i][0][1]]);
+						if (type=='score') temp.push([scores[i][0][0], scores[i][0][1]]);
+						if (type=='speed') temp.push([scores[i][0][0], scores[i][0][4]]);
 					}
 					else if (idtemp !== scores[i][0][2]){
 						//console.log("found a new id -> put new id in ids[], create and fill temp[] with 1st score for the new id => " + scores[i][0][2]+ " value: " + scores[i][0][1]);
@@ -293,7 +303,8 @@ var message = "Beginning message...";
 						});
 						//create and fill temp[] with 1st score for the new id
 						var temp = [];
-						temp.push([scores[i][0][0], scores[i][0][1]]);
+						if (type=='score') temp.push([scores[i][0][0], scores[i][0][1]]);
+						if (type=='speed') temp.push([scores[i][0][0], scores[i][0][4]]);
 						//save last new found id so the in future loops it does not get recognized as a new id
 						idtemp = scores[i][0][2];
 					}
@@ -360,13 +371,13 @@ var message = "Beginning message...";
 						//21600000 = 6h hinzufügen beim 2. Wert (vorher hinten + ".5" -> nachguckn!!)
 						if(scores[k][0][0] == removeTime(jsondata.data[i].date).replaceAll('-','')) {
 							if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([parseDate(jsondata.data[i].date).getTime()+21600000, 0, jsondata.data[i].id]);
-							else score.push([parseDate(jsondata.data[i].date).getTime()+21600000, jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
+							else score.push([parseDate(jsondata.data[i].date).getTime()+21600000, jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name, jsondata.data[i].summary.scoredTest.currentSpeed]);
 							//message+=("Building array for exisisting time i=" + i + " and j=" + j +  " and k=" + k + " contents" + JSON.stringify(score) + "<br>");
 						}
 						//date+time is new
 						else {
 							if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([parseDate(jsondata.data[i].date).getTime(), 0, jsondata.data[i].id]);
-							else score.push([parseDate(jsondata.data[i].date).getTime(), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
+							else score.push([parseDate(jsondata.data[i].date).getTime(), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name, jsondata.data[i].summary.scoredTest.currentSpeed]);
 							//message+=("Building array for new time i=" + i + " and j=" + j +  " and k=" + k + " contents" + JSON.stringify(score) + "<br>");
 						}
 					
@@ -377,7 +388,7 @@ var message = "Beginning message...";
 					var score = [];
 					//score.push(jsondata.data[i].date);
 					if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([parseDate(jsondata.data[i].date).getTime(), 0, jsondata.data[i].id]);
-					else score.push([parseDate(jsondata.data[i].date).getTime(), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
+					else score.push([parseDate(jsondata.data[i].date).getTime(), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name, jsondata.data[i].summary.scoredTest.currentSpeed]);
 					
 					//message+=("Building array i=" + i + " and j=" + j + " contents" + JSON.stringify(score) + "<br>");
 				}
@@ -400,33 +411,54 @@ var message = "Beginning message...";
 	}
 		
 	/**
-	*
+	* scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label
 	*/
-	function getMinScore(scores) {
-		min = scores[0][0][1];
-		for (var i = 0, j = scores.length; i < j; i++) {
-			if (min>scores[i][0][1]) min=scores[i][0][1];
+	function getMinScore(scores, type) {
+		var min;
+		if (type=='score') {
+			min = scores[0][0][1];
+			for (var i = 0, j = scores.length; i < j; i++) {
+				if (min>scores[i][0][1]) min=scores[i][0][1];
+			}
 		}
+		//this actually gives max
+		if (type=='speed') {
+			min = scores[0][0][4];
+			for (var i = 0, j = scores.length; i < j; i++) {
+				if (min<scores[i][0][4]) min=scores[i][0][4];
+			}
+		}
+		//$('#test').append("min: " + min);
 		return min;
 	}
 	
-	//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label
-	function getYTicks(scores) {
+	function getYTicks(scores, type) {
 		var scores = getScores();
 		
 		//compute min
-		min = getMinScore(scores);
+		min = getMinScore(scores, type);
 		var ticks = [];
-		//Show 3 more in bottom direction
-		for (var i = Math.round(min)-3, j = 101; i < j; i++) {
-			ticks.push(i);
+		if (type=='score') {
+			//Show 3 more in bottom direction
+			for (var i = Math.round(min)-3, j = 101; i < j; i++) {
+				ticks.push(i);
+			}
 		}
-
+		if (type=='speed') {
+			//Show 0 and 2 more secnds than max
+			for (var i = 0, j = Math.round(min)+2; i < j; i++) {
+				ticks.push(i);
+			}
+		}
+		
+		//$('#test').append("ticks: " + JSON.stringify(ticks));
 		return ticks;
-		//$('#console').append("ticks: " + JSON.stringify(ticks));
 	}
 	
-	function showScores() {
+	/**
+	* heavily inspired by: http://www.pikemere.co.uk/blog/tutorial-flot-how-to-create-bar-charts/
+	*/
+	function showResults(type) {
 		var scores = getScores();
 		
 		message+=("<p>Scores array " + JSON.stringify(scores));
@@ -436,8 +468,18 @@ var message = "Beginning message...";
 		//message+=("<p>Ds array " + JSON.stringify(tm));
 
 		//$('#test').html(message);
-				
-		$.plot($("#scoreGraph"), transformScores(scores), {
+		var max;
+		var yaxislabel;
+		if (type=='score') {
+			max = 100;
+			yaxislabel = 'Score';
+		}
+		if (type=='speed') {
+			max = getMinScore(scores, type)+2;
+			yaxislabel = 'Response time [s]';
+		}
+		
+		$.plot($("#scoreGraph"), transformScores(scores, type), {
 			grid:{
 				hoverable:true,
 				clickable: false,
@@ -464,7 +506,7 @@ var message = "Beginning message...";
 				tickSize: [1, "day"],
 				//hide gridlines
 				tickLength: 0,
-				axisLabel: 'Month',
+				axisLabel: 'Date',
 				axisLabelUseCanvas: true,
 				axisLabelFontSizePixels: 12,
 				axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
@@ -474,10 +516,11 @@ var message = "Beginning message...";
 				panRange: [(dateSubstract(parseDate(fromDate), 'd', '2')).getTime(), (dateSubstract(parseDate(toDate), 'd', '-2')).getTime()]
 			},
 			yaxis: {
-				ticks: getYTicks(scores),
+				axisLabel: yaxislabel,
+				ticks: getYTicks(scores, type),
 				//Show 3 more in bottom direction
-				min: getMinScore(scores)-3,
-				max: 100,
+				min: getMinScore(scores, type)-3,
+				max: max,
 				zoomRange: false,
 				panRange: false
 			}
