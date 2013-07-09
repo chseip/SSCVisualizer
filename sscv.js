@@ -1,4 +1,8 @@
 var jsondata = [];
+var selServices = [];
+var fromDate;
+var toDate;
+var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
 var message = "Beginning message...";
 
 	String.prototype.replaceAll = function(character,replaceChar){
@@ -9,24 +13,6 @@ var message = "Beginning message...";
 
 		return word;
 	}
-	
-	/**
-	* @url: http://www.peterkropff.de/tutorials/javascript_arrays/funktionen.htm
-	* produces an error in getScores() but I don't know why
-	*/
-	/*
-	Array.prototype.inArray = function (find)
-	{
-	  for(var i in this) 
-	  {
-		if (find == this[i]) 
-		{
-		  return true;
-		}
-	  }
-	  return false;
-	}
-	*/
 	
 	/**
 	* http://www.smart-webentwicklung.de/2012/12/javascript-eigene-inarray-funktion-schreiben/
@@ -47,135 +33,7 @@ var message = "Beginning message...";
 	* SideBySide Bars Plugin
 	* @url: http://en.benjaminbuffet.com/labs/flot/
 	*/
-	/*
-	$(function () {
-		var previousPoint;
-	 
-		var d1 = [["0", 10], [1, 8], [2, 4]];
-		var d2 = [[0, 5], [1, 6], [2, "8"]];
-		var d3 = [[0, 7], [1, 4], [2, 10]];
-		/*
-		var d1 = [];
-		for (var i = 0; i <= 10; i += 1)
-			d1.push([i, parseInt(Math.random() * 30)]);
-	 
-		var d2 = [];
-		for (var i = 0; i <= 10; i += 1)
-			d2.push([i, parseInt(Math.random() * 30)]);
-	 
-		var d3 = [];
-		for (var i = 0; i <= 10; i += 1)
-			d3.push([i, parseInt(Math.random() * 30)]);
-		*/
-		/*
-		var ds = new Array();
-	 
-		ds.push({
-			label:"d1",
-			data:d1,
-			bars: {
-				show: true, 
-				barWidth: 0.2, 
-				order: 1,
-				lineWidth : 2
-			}
-		});
-		ds.push({
-			data:d2,
-			bars: {
-				show: true, 
-				barWidth: 0.2, 
-				order: 2
-			}
-		});
-		ds.push({
-			data:d3,
-			bars: {
-				show: true, 
-				barWidth: 0.2, 
-				order: 3
-			}
-		});
-		  //Display graph
-		$.plot($("#placeholder1"), ds, {
-			grid:{
-				hoverable:true
-			},
-			xaxis: { ticks:[[0,'Bob'],[1,'Chris'],[2,'Joe']]}
-		});
-		
-		//tooltip function
-		function showTooltip(x, y, contents, areAbsoluteXY) {
-			var rootElt = 'body';
-		
-			$('<div id="tooltip" class="tooltip-with-bg">' + contents + '</div>').css( {
-				position: 'absolute',
-				display: 'none',
-				'z-index':'1010',
-				top: y,
-				left: x
-			}).prependTo(rootElt).show();
-		}
-		
-		//add tooltip event
-		$("#placeholder1").bind("plothover", function (event, pos, item) {
-			if (item) {
-				if (previousPoint != item.datapoint) {
-					previousPoint = item.datapoint;
-		 
-					//delete de pr√©c√©dente tooltip
-					$('.tooltip-with-bg').remove();
-		 
-					var x = item.datapoint[0];
-		 
-					//All the bars concerning a same x value must display a tooltip with this value and not the shifted value
-					if(item.series.bars.order){
-						for(var i=0; i < item.series.data.length; i++){
-							if(item.series.data[i][3] == item.datapoint[0])
-								x = item.series.data[i][0];
-						}
-					}
-		 
-					var y = item.datapoint[1];
-		 
-					showTooltip(item.pageX+5, item.pageY+5,x + " = " + y);
-		 
-				}
-			}
-			else {
-				$('.tooltip-with-bg').remove();
-				previousPoint = null;
-			}
-		 
-		});
-	});
-	*/
-	
-	/**
-	* Flot
-	*/
-	/*
-	$(function() {
-		var data = [ ["January", 10], ["February", 8], ["March", 4], ["April", 13], ["May", 17], ["June", 9] ];
 
-		$.plot("#placeholder", [ data ], {
-			series: {
-				bars: {
-					show: true,
-					barWidth: 0.2,
-					align: "center"
-				}
-			},
-			yaxis: {
-				ticks: [1.5, 2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20]
-			},
-			xaxis: {
-				mode: "categories",
-				tickLength: 0
-			}
-		});
-	});
-	*/
 	
 	/**
 	* datepicker: http://jqueryui.com/datepicker/
@@ -227,6 +85,7 @@ var message = "Beginning message...";
 		if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} date = yyyy+'-'+mm+'-'+dd;
 		return date;
 	}
+	
 
 	/**
 	* http://stackoverflow.com/questions/1296358/subtract-days-from-a-date-in-javascript
@@ -247,23 +106,74 @@ var message = "Beginning message...";
 		return new Date(y, m, d);
 	}
 	
+	/**
+	* make YYYY-MM-DD a  valid date
+	*/
+	function parseDate(from){
+		from = from.replace(/-/g,'/');
+		return new Date(from);
+	}
+	
+	/**
+	* Makes sure that approx. 5 days are displayed at first
+	*/
+	function calcMin() {
+		//Display 5 days
+		var diffDays = Math.round(Math.abs((parseDate(fromDate)).getTime() - parseDate(toDate).getTime())/(oneDay));
+		if (diffDays >= 4) {
+			var middleDay = dateSubstract(parseDate(toDate), 'd', diffDays/2);
+			var minDate = dateSubstract(middleDay, 'd', '2');
+		}
+		else var minDate = (parseDate(fromDate)).getTime();
+		return minDate;
+	}
+	
+	/**
+	* Makes sure that approx. 5 days are displayed at first
+	*/
+	function calcMax() {
+		//Display 5 days
+		var diffDays = Math.round(Math.abs((parseDate(fromDate)).getTime() - parseDate(toDate).getTime())/(oneDay));
+		if (diffDays >= 4) {
+			var middleDay = dateSubstract(parseDate(toDate), 'd', diffDays/2);
+			var maxDate = dateSubstract(middleDay, 'd', '-2');;
+		}
+		else {
+			//Add one day because the last day is not shown in the graph (reason unknown)
+			var maxDate = (dateSubstract(parseDate(toDate), 'd', '-1')).getTime();
+		}
+		return maxDate;
+	}
+	
 	function jsonptest() {
 		//Deactivate other buttons
-		document.getElementById('ListBtn').disabled = true;
+		//document.getElementById('ListBtn').disabled = true;
 		document.getElementById('ScoreBtn').disabled = true;
 	
 		var authentication = $('#auth').val();
 		var reqtype = $('#type').val();
-		if(document.getElementById('period1').checked) var timeperiod = "7";
-		if(document.getElementById('period2').checked) var timeperiod = "14";
-		if(document.getElementById('period3').checked) var timeperiod = "2500";
-		var fromDate = transformDateToNum(dateSubstract(new Date(), 'd', timeperiod));
-		//new Date() = today!
-		var toDate = transformDateToNum(new Date());
+		if(document.getElementById('period1').checked) {
+			var timeperiod = "7";
+			fromDate = transformDateToNum(dateSubstract(new Date(), 'd', timeperiod));
+			//new Date() = today!
+			toDate = transformDateToNum(new Date());
+		}
+		if(document.getElementById('period2').checked) {
+			var timeperiod = "14";
+			fromDate = transformDateToNum(dateSubstract(new Date(), 'd', timeperiod));
+			//new Date() = today!
+			toDate = transformDateToNum(new Date());
+		}
+		if(document.getElementById('period3').checked) {
+			var timeperiod = "2500";
+			fromDate = transformDateToNum(dateSubstract(new Date(), 'd', timeperiod));
+			//new Date() = today!
+			toDate = transformDateToNum(new Date());
+		}
 		
 		if(document.getElementById('period4').checked) {
-			var fromDate = $('#from').val();
-			var toDate = $('#to').val();
+			fromDate = $('#from').val();
+			toDate = $('#to').val();
 		}
 		
 		document.getElementById("console").textContent = "Requesting data with "+ authentication + " and of type " + reqtype + " since " + fromDate;
@@ -297,7 +207,8 @@ var message = "Beginning message...";
 
          } else {
             $('#console').html("Success! Your data is here! " + data.returnedRecords + " recods were returned");
-			document.getElementById('ListBtn').disabled = false;
+			getServices();
+			//document.getElementById('ListBtn').disabled = false;
 		 }
 		  //document.getElementById("response").textContent = JSON.stringify(data);
 		  //document.getElementById("response").textContent = JSON.stringify(data.apiVersion); //mit ""
@@ -330,64 +241,21 @@ var message = "Beginning message...";
 		}
 		output+="</select>";
 		document.getElementById("serviceList").innerHTML=output;
-		document.getElementById("test").innerHTML=testOut;
+		//document.getElementById("test").innerHTML=testOut;
 		document.getElementById('ScoreBtn').disabled = false;
 	}
 	
-	/*
-	function showScores() {
-	//var data = [ ["January", 10], ["February", 8], ["March", 4], ["April", 13], ["May", 17], ["June", 9] ];
-		var selServices = [];
-		selServices = $('#services').val();
-		$('#test').html(selServices[0]);
-		var scores = [];
-		
-		var scoreOutput="<ul>";
-		for (var i in jsondata.data) {
-			for (var j in selServices) {
-				var score = [];
-				score.push(jsondata.data[i].date);
-				if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push("0");
-				else score.push(jsondata.data[i].summary.scoredTest.currentScore);
-
-				if (jsondata.data[i].id == selServices[j]) {
-					scoreOutput+="<li>" +  jsondata.data[i].id + " - " + removeTime(jsondata.data[i].date) + " - " + jsondata.data[i].summary.scoredTest.currentScore + "</li>";
-					scores.push(score);
-				}
-			}
-		scoreOutput+="</ul>";
-		$('#test').html(scoreOutput);
-		}
-		$.plot("#placeholder", [ scores ], {
-			series: {
-				bars: {
-					show: true,
-					barWidth: 0.2,
-					align: "center"
-				}
-			},
-			yaxis: {
-				ticks: [96, 98, 99, 100],
-				min: 95,
-				max: 100
-			},
-			xaxis: {
-				mode: "categories",
-				tickLength: 0
-			}
-		});
-	}
-	*/
-	
 	//Transforms scores[] into data[] suitable for flot
 	//Attention "for.. in" does not work here! http://stackoverflow.com/questions/500504/javascript-for-in-with-arrays
-	//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id
+	//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label
 	//TODO: display name instead of id as label
 	//TODO: could be made easier using the inArray() function
 	function transformScores(scores) {
 		var ids = [];
 		var idtemp = "empty";
 		var ds = new Array();
+		
+		var barWidth = calcBarWidth();
 		
 		for (var i = 0, j = scores.length; i < j; i++) {
 			//console.log(i + "ter schleifendurchlauf in transformScores()");
@@ -418,7 +286,7 @@ var message = "Beginning message...";
 							data:temp,
 							bars: {
 								show: true, 
-								barWidth: 0.05, 
+								barWidth: calcBarWidth(), 
 								order: 1,
 								lineWidth : 1
 							}
@@ -439,7 +307,7 @@ var message = "Beginning message...";
 					data:temp,
 					bars: {
 						show: true, 
-						barWidth: 0.05, 
+						barWidth: calcBarWidth(), 
 						order: 1,
 						lineWidth : 1
 					}
@@ -449,18 +317,32 @@ var message = "Beginning message...";
 		return ds;
 	}
 	
+	/**
+	* Calaculates the width of the bars depending on the number of selected services)
+	*/
+	function calcBarWidth() {
+		selServices = $('#services').val();
+		var barWidth=0;
+		//XX hours * 60 minutes * 60 seconds * 1000 (milliseconds)
+		if (selServices.length <= 2) barWidth=2.5*60*60*1000;
+		if (selServices.length == 3) barWidth=1.75*60*60*1000;
+		if (selServices.length == 4) barWidth=1.25*60*60*1000;
+		if (selServices.length == 5) barWidth=1*60*60*1000;
+		if (selServices.length >= 6) barWidth=0.5*60*60*1000;
+		return barWidth;
+	}
+	
 	//returns the dates, scores, id and anames for the selected services
 	//TODO: could be made easier using the inArray() function
 	function getScores() {
-		var selServices = [];
 		selServices = $('#services').val();
 		
 		//TODO: error handling!
-		$('#console').html(JSON.stringify(selServices));
-		$('#console').html(selServices.length);
+		//$('#console').append(JSON.stringify(selServices));
+		//$('#console').append("selServices.length: "+selServices.length);
 		if (selServices.length == 'null') $('#console').html("<b>Error:</b> No service selected");
 		
-		$('#test').html(selServices[0]);
+		//$('#test').html(selServices[0]);
 		var scores = [];
 		
 		var dates = [];
@@ -475,15 +357,16 @@ var message = "Beginning message...";
 					for (var k in scores) {
 						var score = [];
 						//date+time exists -> add .5 at the end of the date
+						//21600000 = 6h hinzuf¸gen beim 2. Wert (vorher hinten + ".5" -> nachguckn!!)
 						if(scores[k][0][0] == removeTime(jsondata.data[i].date).replaceAll('-','')) {
-							if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([removeTime(jsondata.data[i].date).replaceAll('-','')+".5", 0, jsondata.data[i].id]);
-							else score.push([removeTime(jsondata.data[i].date).replaceAll('-','')+".5", jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
+							if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([parseDate(jsondata.data[i].date).getTime()+21600000, 0, jsondata.data[i].id]);
+							else score.push([parseDate(jsondata.data[i].date).getTime()+21600000, jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
 							//message+=("Building array for exisisting time i=" + i + " and j=" + j +  " and k=" + k + " contents" + JSON.stringify(score) + "<br>");
 						}
 						//date+time is new
 						else {
-							if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([removeTime(jsondata.data[i].date).replaceAll('-',''), 0, jsondata.data[i].id]);
-							else score.push([removeTime(jsondata.data[i].date).replaceAll('-',''), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
+							if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([parseDate(jsondata.data[i].date).getTime(), 0, jsondata.data[i].id]);
+							else score.push([parseDate(jsondata.data[i].date).getTime(), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
 							//message+=("Building array for new time i=" + i + " and j=" + j +  " and k=" + k + " contents" + JSON.stringify(score) + "<br>");
 						}
 					
@@ -493,14 +376,14 @@ var message = "Beginning message...";
 				else {
 					var score = [];
 					//score.push(jsondata.data[i].date);
-					if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([removeTime(jsondata.data[i].date).replaceAll('-',''), 0, jsondata.data[i].id]);
-					else score.push([removeTime(jsondata.data[i].date).replaceAll('-',''), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
+					if (jsondata.data[i].summary.scoredTest.currentScore == "-99.99") score.push([parseDate(jsondata.data[i].date).getTime(), 0, jsondata.data[i].id]);
+					else score.push([parseDate(jsondata.data[i].date).getTime(), jsondata.data[i].summary.scoredTest.currentScore, jsondata.data[i].id, jsondata.data[i].name]);
 					
 					//message+=("Building array i=" + i + " and j=" + j + " contents" + JSON.stringify(score) + "<br>");
 				}
 				if (jsondata.data[i].id == selServices[j]) {
 					dates.push(removeTime(jsondata.data[i].date));
-					scoreOutput+="<li>" +  jsondata.data[i].id + " - " + removeTime(jsondata.data[i].date) + " - " + jsondata.data[i].summary.scoredTest.currentScore + "</li>";
+					scoreOutput+="<li>" +  jsondata.data[i].id + " - " + parseDate(jsondata.data[i].date).getTime() + " - " + jsondata.data[i].summary.scoredTest.currentScore + "</li>";
 					scores.push(score);
 
 					//message+=("<b>Adding to array scores</b> i=" + i + " and j=" + j + " contents" + JSON.stringify(score) + "<br>");
@@ -511,32 +394,36 @@ var message = "Beginning message...";
 				//message+=("Adding array " + i + " contents" + JSON.stringify(scores));
 			}
 			scoreOutput+="</ul>";
-			$('#test').html(scoreOutput);
+			//$('#test').html(JSON.stringify(scores));
 		}
 		return scores;
 	}
-	
-	//tickMarks array [[20130624,"Bob"],[20130624.5,"Chris"],[20130625,"Joe"],[20130625.5,"Bill"]]
-	function getTickmarks(scores) {
-		var tickMarks = [];
-		var dates = [];
+		
+	/**
+	*
+	*/
+	function getMinScore(scores) {
+		min = scores[0][0][1];
 		for (var i = 0, j = scores.length; i < j; i++) {
-			//1. case: first run, date is new, dates[] is empty
-			if (typeof(dates[0]) == 'undefined') {
-				dates.push(scores[i][0][0]);
-				//TODO: Funktion, die Datum wieder lesbar macht
-				tickMarks.push([scores[i][0][0],transformDateForTicks(scores[i][0][0])]);
-			}
-			//2. case: there is something in dates[] -> check is current date is already in dates[]
-			else if(!inArray(dates,scores[i][0][0])) {
-				//found a new date -> add it to dates[]
-				dates.push(scores[i][0][0]);
-				//TODO: Funktion, die Datum wieder lesbar macht
-				tickMarks.push([scores[i][0][0],transformDateForTicks(scores[i][0][0])]);
-			}
+			if (min>scores[i][0][1]) min=scores[i][0][1];
 		}
-		console.log("tickMarks: " + JSON.stringify(tickMarks));
-		return tickMarks;
+		return min;
+	}
+	
+	//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label
+	function getYTicks(scores) {
+		var scores = getScores();
+		
+		//compute min
+		min = getMinScore(scores);
+		var ticks = [];
+		//Show 3 more in bottom direction
+		for (var i = Math.round(min)-3, j = 101; i < j; i++) {
+			ticks.push(i);
+		}
+
+		return ticks;
+		//$('#console').append("ticks: " + JSON.stringify(ticks));
 	}
 	
 	function showScores() {
@@ -545,30 +432,57 @@ var message = "Beginning message...";
 		message+=("<p>Scores array " + JSON.stringify(scores));
 		message+=("<p>Ds array " + JSON.stringify(transformScores(scores)));
 		
-		var tm = getTickmarks(scores);
-		
-		message+=("<p>Ds array " + JSON.stringify(tm));
+		//var tm = getTickmarks(scores);
+		//message+=("<p>Ds array " + JSON.stringify(tm));
 
-		$('#test').html(message);
-		
+		//$('#test').html(message);
+				
 		$.plot($("#scoreGraph"), transformScores(scores), {
 			grid:{
-				hoverable:true
+				hoverable:true,
+				clickable: false,
+				borderWidth: 1
+			},
+			pan:{
+				interactive: true
+				//left: -100,
+				//top: 20
+			},
+			zoom: {
+				interactive: true
 			},
 			legend: {
-				container: document.getElementById("legend"),
-				position: "se"
+				container: document.getElementById("legend")
+			},
+			xaxis: {
+				//Stellschraube f¸r Anzeigebereich
+				min: calcMin(),
+				max: calcMax(),
+				mode: "time",
+				timeformat: "%y-%m-%d",
+				//day displayed only once
+				tickSize: [1, "day"],
+				//hide gridlines
+				tickLength: 0,
+				axisLabel: 'Month',
+				axisLabelUseCanvas: true,
+				axisLabelFontSizePixels: 12,
+				axisLabelFontFamily: 'Verdana, Arial, Helvetica, Tahoma, sans-serif',
+				axisLabelPadding: 5,
+				//Stellschraube f¸r pan Bereich
+				//Add two days so that in all cases all bars are visible
+				panRange: [(dateSubstract(parseDate(fromDate), 'd', '2')).getTime(), (dateSubstract(parseDate(toDate), 'd', '-2')).getTime()]
 			},
 			yaxis: {
-				ticks: [96, 97, 98, 99, 100],
-				min: 95,
-				max: 100
-			},
-			//             x wert, 'label'
-			//xaxis: { ticks:[[4,'Bob'],[5,'Chris'],[6,'Joe'],[7,'Bill']]}
-			//xaxis: { ticks:[[20130624,scores[0][0][0]],[20130624.5,scores[1][0][0]],[20130625,scores[2][0][0]],[20130625.5,scores[3][0][0]]]}
-			xaxis: { ticks: getTickmarks(scores) }
+				ticks: getYTicks(scores),
+				//Show 3 more in bottom direction
+				min: getMinScore(scores)-3,
+				max: 100,
+				zoomRange: false,
+				panRange: false
+			}
 		});
+		
 		
 		//tooltip function
 		function showTooltip(x, y, contents, areAbsoluteXY) {
@@ -604,8 +518,8 @@ var message = "Beginning message...";
 		 
 					var y = item.datapoint[1];
 		 
-					showTooltip(item.pageX+5, item.pageY+5,x + " = " + y);
-		 
+					//showTooltip(item.pageX+5, item.pageY+5,x + " = " + y);
+					showTooltip(item.pageX+5, item.pageY+5,y);	
 				}
 			}
 			else {
@@ -614,42 +528,31 @@ var message = "Beginning message...";
 			}
 		 
 		});
+	}	
+		
+	function test2() {
+		var date = jsondata.data[0].date;
+		$("#test").html(date + "-" + parseDate(date).getTime());
 	}
 	
-	function test2() {
 	
-		/*
-		var date = "20130624";
-		
-		//var date = "20130625.5";
-		var dateFormat;
-		
-		if (date.indexOf('.5') > -1) {
-			dateFormat = date.substr(0, 4) + "-" + date.substr(4, 2)  + "-" + date.substr(6, 2) + " 2nd";
-			$('#test').html(dateFormat);
+	function blubb() {
+				//Display 5 days
+		var diffDays = Math.round(Math.abs((parseDate(fromDate)).getTime() - parseDate(toDate).getTime())/(oneDay));
+		if (diffDays >= 4) {
+			var middleDay = dateSubstract(parseDate(toDate), 'd', diffDays/2);
+			var minDate = dateSubstract(middleDay, 'd', '2');
+			var maxDate = dateSubstract(middleDay, 'd', '-2');;
 		}
 		else {
-			dateFormat = date.substr(0, 4) + "-" + date.substr(4, 2)  + "-" + date.substr(6, 2) + " 1st";
-			$('#test').html(dateFormat);
+			var minDate = (parseDate(fromDate)).getTime();
+			//Add one day because the last day is not shown in the graph (reason unknown)
+			var maxDate = (dateSubstract(parseDate(toDate), 'd', '-1')).getTime();
 		}
-		
-		/*
-		var a = [[['a','b','c'],['d','d','f'],['g','h','i']],[['j','k','l'],['m','n','o'],['p','q','r']]]
-		var b = [[["a","b"]],[["c","d"]],[["e","f"]],[["g","h"]]];
-		var c = [[["20130624",98.73,"WMS_BfN_Schutzgebiete_AWZ"]],[["20130624.5",98.66,"WMS_BfN_Schutzgebiete_AWZ"]],[["20130625",98.76,"WMS_BfN_Schutzgebiete_AWZ"]],[["20130625.5",98.74,"WMS_BfN_Schutzgebiete_AWZ"]],[["20130624",99.78,"WMS_LLUR_MSRL-D5-Eutrophierung"]],[["20130624.5",99.78,"WMS_LLUR_MSRL-D5-Eutrophierung"]],[["20130625",99.78,"WMS_LLUR_MSRL-D5-Eutrophierung"]],[["20130625.5",99.78,"WMS_LLUR_MSRL-D5-Eutrophierung"]]]
-		console.log(typeof(c[50]));
-
-		if (c[0][0][2] == c[1][0][2]) $('#test').html("Success!!!");
-		else $('#test').html("Error!!!");
-		
-		/*
-		if (typeof(c[50]) !== 'undefined') {
-			if (c[50].length > 0) $('#test').html(c[50][0][2]);
-		}
-		else $('#test').html("<b>ERROR</b>");
-		
-		var from = $('#from').val();
-		var to = $('#to').val();
-		$('#test').html(from + " to " + to);
-		*/
+		$("#test").append("diffDays/2: "+diffDays/2+"<p>");
+		$("#test").append("fromDate: "+fromDate+"<p>");
+		$("#test").append("toDate: "+toDate+"<p>");
+		$("#test").append("Middleday: "+middleDay+"<p>");
+		$("#test").append("minDate: "+minDate+"<p>");
+		$("#test").append("maxDate: "+maxDate+"<p>");
 	}

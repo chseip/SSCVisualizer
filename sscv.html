@@ -5,22 +5,21 @@
 	<title>SSCVisualizer</title>
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
 	
-	<!-- <link rel="stylesheet" href="http://jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">-->
-	<!-- <link rel="stylesheet" href="http://jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
-	<link href="/MDI-DE/SSCVisualizer/lib/flot/examples/examples.css" rel="stylesheet" type="text/css">
-	<link rel="stylesheet" href="http://en.benjaminbuffet.com/wp-content/themes/theme/style.css" type="text/css" media="screen" />-->
-	<link rel="stylesheet" href="/MDI-DE/SSCVisualizer/style_sscv.css" type="text/css">
+	<link rel="stylesheet" href="style_sscv.css" type="text/css">
 	
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-	<script language="javascript" type="text/javascript" src="/MDI-DE/SSCVisualizer/lib/flot/jquery.flot.js"></script>
-	<script language="javascript" type="text/javascript" src="/MDI-DE/SSCVisualizer/lib/flot/jquery.flot.categories.js"></script>
+	<script language="javascript" type="text/javascript" src="http://www.flotcharts.org/flot/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="http://www.flotcharts.org/flot/jquery.flot.categories.js"></script>
 	<script language="javascript" type="text/javascript" src="http://www.benjaminbuffet.com/public/js/jquery.flot.orderBars.js"></script>
+	<script language="javascript" type="text/javascript" src="http://www.flotcharts.org/flot/jquery.flot.navigate.js"></script>
+	<script language="javascript" type="text/javascript" src="http://www.flotcharts.org/flot/jquery.flot.time.js"></script>
 	
-    <script src="/MDI-DE/SSCVisualizer/sscv.js"></script>
+    <script src="sscv.js"></script>
 </head>
 <body>
 	<h1>SSCVisualizer</h1>
+	<i>Hint: Use Mousewheel to zoom and click'n'hold mouse button to pan</i><p>
 	<div id="main">
 		<div id="input">
 			<h2>Input</h2>
@@ -38,22 +37,22 @@
 		   </section>
 			<label for="from">From</label>
 			<input type="text" id="from" name="from" />
+			<br>
 			<label for="to">to</label>
 			<input type="text" id="to" name="to" />
 			<div id="reqLink"></div>
+			<input class="buttons" type="button" value="Fetch JSON" id="FetchBtn" onClick="jsonptest()"/>
 			<div id="serviceList"></div>
+			<div id="buttonArea">
+				<h2>Action</h2>			
+					<input class="buttons" type="button" value="Show Score" id="ScoreBtn" onClick="showScores()" disabled="true"/>
+					
+					<input class="buttons" type="button" value="Show Speed" onClick="getYTicks()"/>
+			</div>
 	   </div>
 	   
-	   <div id="buttonArea">
-		<h2>Action</h2>
-			<input class="buttons" type="button" value="Fetch JSON" id="FetchBtn" onClick="jsonptest()"/>
-			<input class="buttons" type="button" value="List Services" id="ListBtn" onClick="getServices()" disabled="true"/>
-			
-			<input class="buttons" type="button" value="Show currentScore" id="ScoreBtn" onClick="showScores()" disabled="true"/>
-			
-			<input class="buttons" type="button" value="Test" onClick="test2()"/>
-			
-			<h3>Legend</h3>
+		<div id="legendArea">	
+			<h2>Legend</h2>
 			<div id="legend"></div>
 		</div>
 		
@@ -69,21 +68,6 @@
 			<div id="console">
 		</div>
 	</div>
-	
-	   <div id="request"></div>
-   
-   	
-		<div id="response"></div>
-	
-			
-	
-	
-	<br>
-	
-	<br>
-	<div id="placeholder1" style="width:500px;height:300px;"></div>
-	<hr>
-	
 	<hr>
 	<b>Test</b>
 	<div id="test"></div>

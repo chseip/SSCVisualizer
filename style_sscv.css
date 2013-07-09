@@ -32,8 +32,13 @@
 	//width:500px;
 	height:400px;
   }
+  
+#test2 {
+	height:400px;
+	//width:400px;
+  }
 
-#buttonArea {
+#legendArea {
     font-size: 0.9em;
     float: right;
 	width: 15em;
