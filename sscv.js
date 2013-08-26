@@ -571,9 +571,10 @@ var message = "Beginning message...";
 			}
 		 
 		});
+		document.getElementById('SaveBtn').disabled = false;
 	}	
 		
-	function test2() {
+	function saveDiagram() {
 		//Saving the diagram only
 		/*
 		html2canvas(document.getElementById("scoreGraph"), {
