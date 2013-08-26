@@ -16,7 +16,12 @@
 	<script language="javascript" type="text/javascript" src="http://www.flotcharts.org/flot/jquery.flot.time.js"></script>
 	<script language="javascript" type="text/javascript" src="http://www.pikemere.co.uk/blog/jquery.flot.axislabels.js"></script>
 	
-    <script src="sscv.js"></script>
+	<script language="javascript" type="text/javascript" src="http://nihilogic.dk/labs/canvas2image/canvas2image.js"></script>
+	<script language="javascript" type="text/javascript" src="http://nihilogic.dk/labs/canvas2image/base64.js"></script>
+	
+	<script language="javascript" type="text/javascript" src="http://html2canvas.hertzen.com/build/html2canvas.js"></script>
+	
+    <script src="sscv_new.js"></script>
 </head>
 <body>
 	<h1>SSCVisualizer</h1>
@@ -49,6 +54,8 @@
 					<input class="buttons" type="button" value="Show Score" id="ScoreBtn" onClick="showResults('score')" disabled="true"/>
 					
 					<input class="buttons" type="button" value="Show Speed" id="SpeedBtn" onClick="showResults('speed')" disabled="true"/>
+					
+					<input class="buttons" type="button" value="Test" id="TestBtn" onClick="test2()"/>
 			</div>
 	   </div>
 	   
@@ -56,11 +63,9 @@
 			<h2>Legend</h2>
 			<div id="legend"></div>
 		</div>
-		
 	   <div id="scoreGraph">
 		<h2>Diagram</h2>
 	   </div>
-	      
 	   
 	</div>
 	
@@ -71,6 +76,8 @@
 	</div>
 	<hr>
 	<b>Test</b>
-	<div id="test"></div>
+	<div id="test">
+		<img id="composition">
+	</div>
 </body>
 </html>

@@ -574,8 +574,46 @@ var message = "Beginning message...";
 	}	
 		
 	function test2() {
-		var date = jsondata.data[0].date;
-		$("#test").html(date + "-" + parseDate(date).getTime());
+		//Saving the diagram only
+		/*
+		html2canvas(document.getElementById("scoreGraph"), {
+			onrendered: function(canvas) {
+					Canvas2Image.saveAsPNG(canvas);
+				}
+			});
+		*/
+		
+		//Saving the diagram AND the legend in one image
+		var legendCanvas;
+		var diagramCanvas;
+		html2canvas(document.getElementById("legend"), {
+			onrendered: function(canvas) {
+				legendCanvas = canvas;
+				//document.body.appendChild(legendCanvas);
+				html2canvas(document.getElementById("scoreGraph"), {
+					onrendered: function(canvas) {
+						diagramCanvas = canvas;
+						
+						//Commbine the two images (legend+diagram), source: http://jsfiddle.net/m1erickson/5JTtd/
+						var diagramAndLegendCanvas=document.createElement("canvas");
+						var ctx=diagramAndLegendCanvas.getContext("2d");
+						diagramAndLegendCanvas.width=diagramCanvas.width;
+						diagramAndLegendCanvas.height=diagramCanvas.height;
+						
+						// draw all 2 images into 1 combined image
+						ctx.drawImage(diagramCanvas,0,0);
+						ctx.drawImage(legendCanvas,diagramCanvas.width-legendCanvas.width,0);
+
+						//Display
+						//var result = document.getElementById("composition");
+						//result.src = diagramAndLegendCanvas.toDataURL();
+						
+						//Save
+						Canvas2Image.saveAsPNG(diagramAndLegendCanvas);
+					}
+				});
+			}
+		});
 	}
 	
 	
@@ -598,4 +636,7 @@ var message = "Beginning message...";
 		$("#test").append("Middleday: "+middleDay+"<p>");
 		$("#test").append("minDate: "+minDate+"<p>");
 		$("#test").append("maxDate: "+maxDate+"<p>");
+	}
+	
+	function test() {
 	}
