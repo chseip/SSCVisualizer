@@ -4,6 +4,7 @@ var fromDate;
 var toDate;
 var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
 var message = "Beginning message...";
+var AggrOrComplex = "";
 
 	String.prototype.replaceAll = function(character,replaceChar){
 		var word = this.valueOf();
@@ -459,6 +460,7 @@ var message = "Beginning message...";
 	* heavily inspired by: http://www.pikemere.co.uk/blog/tutorial-flot-how-to-create-bar-charts/
 	*/
 	function showResults(type) {
+		AggrOrComplex = "complex";
 		var scores = getScores();
 		
 		message+=("<p>Scores array " + JSON.stringify(scores));
@@ -575,46 +577,47 @@ var message = "Beginning message...";
 	}	
 		
 	function saveDiagram() {
-		//Saving the diagram only
-		/*
-		html2canvas(document.getElementById("scoreGraph"), {
-			onrendered: function(canvas) {
-					Canvas2Image.saveAsPNG(canvas);
-				}
-			});
-		*/
-		
-		//Saving the diagram AND the legend in one image
-		var legendCanvas;
-		var diagramCanvas;
-		html2canvas(document.getElementById("legend"), {
-			onrendered: function(canvas) {
-				legendCanvas = canvas;
-				//document.body.appendChild(legendCanvas);
-				html2canvas(document.getElementById("scoreGraph"), {
-					onrendered: function(canvas) {
-						diagramCanvas = canvas;
-						
-						//Commbine the two images (legend+diagram), source: http://jsfiddle.net/m1erickson/5JTtd/
-						var diagramAndLegendCanvas=document.createElement("canvas");
-						var ctx=diagramAndLegendCanvas.getContext("2d");
-						diagramAndLegendCanvas.width=diagramCanvas.width;
-						diagramAndLegendCanvas.height=diagramCanvas.height;
-						
-						// draw all 2 images into 1 combined image
-						ctx.drawImage(diagramCanvas,0,0);
-						ctx.drawImage(legendCanvas,diagramCanvas.width-legendCanvas.width,0);
-
-						//Display
-						//var result = document.getElementById("composition");
-						//result.src = diagramAndLegendCanvas.toDataURL();
-						
-						//Save
-						Canvas2Image.saveAsPNG(diagramAndLegendCanvas);
+		if (AggrOrComplex=='aggregate') {
+		//Save the diagram only
+			html2canvas(document.getElementById("scoreGraph"), {
+				onrendered: function(canvas) {
+						Canvas2Image.saveAsPNG(canvas);
 					}
 				});
-			}
-		});
+		}
+		if (AggrOrComplex=='complex') {
+		//Saving the diagram AND the legend in one image
+			var legendCanvas;
+			var diagramCanvas;
+			html2canvas(document.getElementById("legend"), {
+				onrendered: function(canvas) {
+					legendCanvas = canvas;
+					//document.body.appendChild(legendCanvas);
+					html2canvas(document.getElementById("scoreGraph"), {
+						onrendered: function(canvas) {
+							diagramCanvas = canvas;
+							
+							//Commbine the two images (legend+diagram), source: http://jsfiddle.net/m1erickson/5JTtd/
+							var diagramAndLegendCanvas=document.createElement("canvas");
+							var ctx=diagramAndLegendCanvas.getContext("2d");
+							diagramAndLegendCanvas.width=diagramCanvas.width;
+							diagramAndLegendCanvas.height=diagramCanvas.height;
+							
+							// draw all 2 images into 1 combined image
+							ctx.drawImage(diagramCanvas,0,0);
+							ctx.drawImage(legendCanvas,diagramCanvas.width-legendCanvas.width,0);
+
+							//Display
+							//var result = document.getElementById("composition");
+							//result.src = diagramAndLegendCanvas.toDataURL();
+							
+							//Save
+							Canvas2Image.saveAsPNG(diagramAndLegendCanvas);
+						}
+					});
+				}
+			});
+		}
 	}
 	
 	
@@ -639,5 +642,90 @@ var message = "Beginning message...";
 		$("#test").append("maxDate: "+maxDate+"<p>");
 	}
 	
-	function test() {
+	function aggregate(type) {		
+		AggrOrComplex = "aggregate";
+		var scores = getScores();
+		//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label, C=4 = currentSpeed
+						
+		var results = [];
+		for (var i = 0, j = scores.length; i < j; i++) {	
+			//Fill complete arrays
+			if (type=='score') results.push([scores[i][0][3], scores[i][0][1]]);
+			if (type=='speed') results.push([scores[i][0][3], scores[i][0][4]]);
+		}
+		
+		var tempArr = new Array();
+		var scoreArr = new Array();
+		for (var i = 0, j = results.length; i < j; i++) {
+			var tempid = results[i][0]; //ID
+			//Falls ID neu lege neues Unter Array an
+			if (!inArray(tempArr,tempid)) {
+				tempArr[i] = tempid;
+				//Initialize the array for the first time
+				if (scoreArr.length === undefined) scoreArr[0] = new Object();
+				else scoreArr[scoreArr.length] = new Object();
+				scoreArr[scoreArr.length-1]["ID"] = tempid;
+				scoreArr[scoreArr.length-1]["Values"] = new Array();
+				scoreArr[scoreArr.length-1]["Values"].push(results[i][1]);//Score
+			}
+			//push score into the scores parameter
+			else scoreArr[scoreArr.length-1]["Values"].push(results[i][1]);//Score
+		}
+		
+		var data = [];
+		for (var i = 0; i < scoreArr.length; i++) {
+		  for (var key in scoreArr[i])
+			if (key === 'Values') {
+				sum = 0;
+				for (k=0; k<scoreArr[i][key].length; k++) {
+					sum += scoreArr[i][key][k];
+				} 
+				avrg = sum / scoreArr[i][key].length; 
+				scoreArr[i]["Mean"] = avrg;
+				data.push(new Array(scoreArr[i]["ID"], avrg));
+			}
+		}
+
+		var max;
+		var yaxislabel;
+		if (type=='score') {
+			max = 100;
+			yaxislabel = 'Score';
+		}
+		if (type=='speed') {
+			max = getMinScore(scores, type)+2;
+			yaxislabel = 'Response time [s]';
+		}
+		$.plot("#scoreGraph", [ data ], {
+			series: {
+				bars: {
+					show: true,
+					barWidth: 0.6,
+					align: "center"
+				}
+			},
+			xaxis: {
+				mode: "categories",
+				tickLength: 0
+			},
+			yaxis: {
+				axisLabel: yaxislabel,
+				//ticks: getYTicks(scores, type),
+				//Show 3 more in bottom direction
+				min: getMinScore(scores, type)-3,
+				max: max,
+			}
+		});
+		document.getElementById('SaveBtn').disabled = false;
 	}
+	
+	function test() {
+		
+	}
+	
+	
+	
+	
+	
+	
+	
