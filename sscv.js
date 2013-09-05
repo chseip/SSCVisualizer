@@ -646,45 +646,61 @@ var AggrOrComplex = "";
 		AggrOrComplex = "aggregate";
 		var scores = getScores();
 		//scores = [A][B][C], A = entry number, B = allways 0, C=0 = date, C=1 = score, C=2 = service id, C=3 service label, C=4 = currentSpeed
-						
+		
+		//Format: [["Service Name",ResultValue],...]
 		var results = [];
 		for (var i = 0, j = scores.length; i < j; i++) {	
 			//Fill complete arrays
 			if (type=='score') results.push([scores[i][0][3], scores[i][0][1]]);
 			if (type=='speed') results.push([scores[i][0][3], scores[i][0][4]]);
 		}
+		//$("#test").append("results: "+JSON.stringify(results)+"<p>");
 		
+		//Format: [{"ID":"Service Name","Values":[ResultValue1,ResultValue2,...]},...]
 		var tempArr = new Array();
-		var scoreArr = new Array();
+		var resultArr = new Array();
 		for (var i = 0, j = results.length; i < j; i++) {
 			var tempid = results[i][0]; //ID
-			//Falls ID neu lege neues Unter Array an
+			//if id is new create a new array
 			if (!inArray(tempArr,tempid)) {
 				tempArr[i] = tempid;
 				//Initialize the array for the first time
-				if (scoreArr.length === undefined) scoreArr[0] = new Object();
-				else scoreArr[scoreArr.length] = new Object();
-				scoreArr[scoreArr.length-1]["ID"] = tempid;
-				scoreArr[scoreArr.length-1]["Values"] = new Array();
-				scoreArr[scoreArr.length-1]["Values"].push(results[i][1]);//Score
+				if (resultArr.length === undefined) resultArr[0] = new Object();
+				else resultArr[resultArr.length] = new Object();
+				resultArr[resultArr.length-1]["ID"] = tempid;
+				resultArr[resultArr.length-1]["Values"] = new Array();
+				resultArr[resultArr.length-1]["Values"].push(results[i][1]);
 			}
-			//push score into the scores parameter
-			else scoreArr[scoreArr.length-1]["Values"].push(results[i][1]);//Score
+			//push result into the values parameter
+			else resultArr[resultArr.length-1]["Values"].push(results[i][1]);
 		}
 		
+		//Format: [["Service Name",ResultMean],...]
+		//$("#test").append("resultArr: "+JSON.stringify(resultArr)+"<p>");
+		$("#test").append("Excel Input: "+"<br>");
 		var data = [];
-		for (var i = 0; i < scoreArr.length; i++) {
-		  for (var key in scoreArr[i])
+		for (var i = 0; i < resultArr.length; i++) {
+		  for (var key in resultArr[i])
 			if (key === 'Values') {
 				sum = 0;
-				for (k=0; k<scoreArr[i][key].length; k++) {
-					sum += scoreArr[i][key][k];
+				for (k=0; k<resultArr[i][key].length; k++) {
+					sum += resultArr[i][key][k];
 				} 
-				avrg = sum / scoreArr[i][key].length; 
-				scoreArr[i]["Mean"] = avrg;
-				data.push(new Array(scoreArr[i]["ID"], avrg));
+				avrg = sum / resultArr[i][key].length; 
+				//$("#test").append("avrg: "+avrg+"<p>");
+				//round to 3 decimal values
+				if (type=='score') {
+					data.push(new Array(resultArr[i]["ID"], Math.round(avrg * 1000) / 1000));
+					$("#test").append(resultArr[i]["ID"] + ";" + Math.round(avrg * 1000) / 1000+"<br>");
+				}
+				if (type=='speed') {
+					data.push(new Array(resultArr[i]["ID"], Math.round(avrg * 1000) / 1000));
+					//$("#test").append("Speed in milliseconds: "+"<br>");
+					$("#test").append(resultArr[i]["ID"] + ";" + Math.round(avrg * 1000) +"<br>");
+				}
 			}
 		}
+		//$("#test").append("data: "+JSON.stringify(data)+"<p>");
 
 		var max;
 		var yaxislabel;
@@ -710,7 +726,6 @@ var AggrOrComplex = "";
 			},
 			yaxis: {
 				axisLabel: yaxislabel,
-				//ticks: getYTicks(scores, type),
 				//Show 3 more in bottom direction
 				min: getMinScore(scores, type)-3,
 				max: max,
@@ -720,7 +735,7 @@ var AggrOrComplex = "";
 	}
 	
 	function test() {
-		
+		x = 55.8154711; alert(Math.round(x * 1000) / 1000);
 	}
 	
 	
